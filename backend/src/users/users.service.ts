@@ -35,7 +35,7 @@ export class UsersService {
     return await this.userRepository.findOne({ where: { username } });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.getUser(id);
     if (updateUserDto.username)
       await this.checkUsername(updateUserDto.username);
@@ -45,7 +45,10 @@ export class UsersService {
         password: await this.hashPassword(updateUserDto.password),
       };
     await this.userRepository.update(id, updateUserDto);
-    return user;
+    return {
+      ...user,
+      ...updateUserDto,
+    };
   }
 
   async remove(id: number) {

@@ -26,7 +26,7 @@ export class AuthService {
     return {
       access_token: await this.jwtService.signAsync(
         { ...payload, type: 'Access' } as JwtPayload,
-        { expiresIn: '15m' },
+        { expiresIn: '15h' },
       ),
       refresh_token: await this.jwtService.signAsync(
         { ...payload, type: 'Refresh' } as JwtPayload,
@@ -36,11 +36,11 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto): Promise<Jwt> {
-    const user = await this.usersService.create({
+    await this.usersService.create({
       username: registerDto.username,
       password: registerDto.password,
     });
-    return this.login(user);
+    return this.login(registerDto);
   }
 
   async authenticate(access_token: string) {

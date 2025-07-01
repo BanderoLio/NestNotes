@@ -1,26 +1,56 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Note } from './entities/note.entity';
+import { Repository } from 'typeorm';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class NotesService {
-  create(createNoteDto: CreateNoteDto) {
-    return 'This action adds a new note';
+  constructor(
+    @InjectRepository(Note) private noteRepository: Repository<Note>,
+  ) {}
+  create(createNoteDto: CreateNoteDto, user: User) {
+    return this.noteRepository.save({
+      ...createNoteDto,
+      user,
+    });
   }
 
-  findAll() {
-    return `This action returns all notes`;
+  findAll(user: User) {
+    return this.noteRepository.find({
+      // relations: { user: true },
+      where: { user },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} note`;
+  async findOne(id: number, user: User) {
+    const note = await this.noteRepository.findOne({ where: { id, user } });
+    if (!note) {
+      throw new NotFoundException(`Note with id ${id} not found`);
+    }
+    return note;
   }
 
-  update(id: number, updateNoteDto: UpdateNoteDto) {
-    return `This action updates a #${id} note`;
+  async update(
+    id: number,
+    updateNoteDto: UpdateNoteDto,
+    user: User,
+  ): Promise<Note> {
+    const note = await this.findOne(id, user);
+    await this.noteRepository.update(id, {
+      ...updateNoteDto,
+    });
+    return {
+      ...note,
+      ...updateNoteDto,
+    };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} note`;
+  async remove(id: number, user: User) {
+    const note = await this.findOne(id, user);
+    await this.noteRepository.delete(id);
+    return note;
   }
 }
