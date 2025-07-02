@@ -1,16 +1,21 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { Theme } from './theme.entity';
 
 @Entity()
 export class Note {
   @PrimaryGeneratedColumn()
   id: number;
+  @Column({ nullable: true })
+  userId: number;
   @ManyToOne(() => User)
   user: User;
-  @Column()
-  title: string;
-  @Column()
-  theme: string;
+  @Column({
+    nullable: true,
+  })
+  title?: string;
+  @ManyToOne(() => Theme, (theme) => theme.notes)
+  theme: Theme;
   @Column({
     type: 'text',
   })

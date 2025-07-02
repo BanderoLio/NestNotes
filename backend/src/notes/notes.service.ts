@@ -5,22 +5,26 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Note } from './entities/note.entity';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
+import { ThemesService } from './themes.service';
 
 @Injectable()
 export class NotesService {
   constructor(
     @InjectRepository(Note) private noteRepository: Repository<Note>,
+    private themesService: ThemesService,
   ) {}
-  create(createNoteDto: CreateNoteDto, user: User) {
-    return this.noteRepository.save({
-      ...createNoteDto,
-      user,
-    });
+  async create(createNoteDto: CreateNoteDto, user: User): Promise<Note> {
+    const { themeId, ...createNoteFields } = createNoteDto;
+    const note = new Note();
+    Object.assign(note, createNoteFields);
+    note.user = user;
+    if (themeId) note.theme = await this.themesService.findOne(themeId);
+    return this.noteRepository.save(note);
   }
 
   findAll(user: User) {
     return this.noteRepository.find({
-      // relations: { user: true },
+      relations: { theme: true },
       where: { user },
     });
   }
@@ -39,13 +43,10 @@ export class NotesService {
     user: User,
   ): Promise<Note> {
     const note = await this.findOne(id, user);
-    await this.noteRepository.update(id, {
-      ...updateNoteDto,
-    });
-    return {
-      ...note,
-      ...updateNoteDto,
-    };
+    const { themeId, ...updateNoteFields } = updateNoteDto;
+    Object.assign(note, updateNoteFields);
+    if (themeId) note.theme = await this.themesService.findOne(themeId);
+    return this.noteRepository.save(note);
   }
 
   async remove(id: number, user: User) {

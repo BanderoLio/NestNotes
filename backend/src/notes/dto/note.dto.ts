@@ -1,12 +1,13 @@
 import { Exclude } from 'class-transformer';
 import { User } from '../../users/entities/user.entity';
+import { Theme } from '../entities/theme.entity';
 
 export class NoteDto {
   id: number;
   title: string;
-  theme: string;
+  theme: Theme;
   content: string;
-  user_id: number;
+  userId: number;
   @Exclude()
   user: User;
   constructor(partial: Partial<NoteDto>) {

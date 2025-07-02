@@ -32,7 +32,7 @@ export class NotesController {
       (note) =>
         new NoteDto({
           ...note,
-          user_id: user.id,
+          userId: user.id,
         }),
     );
   }
@@ -41,7 +41,7 @@ export class NotesController {
   async findOne(@Param('id') id: string, @GetUser() user: User) {
     return new NoteDto({
       ...(await this.notesService.findOne(+id, user)),
-      user_id: user.id,
+      userId: user.id,
     });
   }
 
@@ -53,7 +53,7 @@ export class NotesController {
   ) {
     return new NoteDto({
       ...(await this.notesService.update(+id, updateNoteDto, user)),
-      user_id: user.id,
+      userId: user.id,
     });
   }
 
@@ -61,7 +61,6 @@ export class NotesController {
   async remove(@Param('id') id: string, @GetUser() user: User) {
     return new NoteDto({
       ...(await this.notesService.remove(+id, user)),
-      user_id: user.id,
     });
   }
 }

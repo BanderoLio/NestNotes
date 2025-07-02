@@ -24,11 +24,11 @@ export class AuthService {
     }
     const payload: Partial<JwtPayload> = { sub: user.id };
     return {
-      access_token: await this.jwtService.signAsync(
+      accessToken: await this.jwtService.signAsync(
         { ...payload, type: 'Access' } as JwtPayload,
         { expiresIn: '15h' },
       ),
-      refresh_token: await this.jwtService.signAsync(
+      refreshToken: await this.jwtService.signAsync(
         { ...payload, type: 'Refresh' } as JwtPayload,
         { expiresIn: '7d' },
       ),
