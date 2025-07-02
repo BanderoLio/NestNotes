@@ -22,8 +22,8 @@ export class NotesController {
   constructor(private readonly notesService: NotesService) {}
 
   @Post()
-  create(@Body() createNoteDto: CreateNoteDto, @GetUser() user: User) {
-    return this.notesService.create(createNoteDto, user);
+  async create(@Body() createNoteDto: CreateNoteDto, @GetUser() user: User) {
+    return new NoteDto(await this.notesService.create(createNoteDto, user));
   }
 
   @Get()
@@ -32,7 +32,7 @@ export class NotesController {
       (note) =>
         new NoteDto({
           ...note,
-          userId: user.id,
+          // userId: user.id,
         }),
     );
   }
@@ -41,7 +41,7 @@ export class NotesController {
   async findOne(@Param('id') id: string, @GetUser() user: User) {
     return new NoteDto({
       ...(await this.notesService.findOne(+id, user)),
-      userId: user.id,
+      // userId: user.id,
     });
   }
 
@@ -53,7 +53,7 @@ export class NotesController {
   ) {
     return new NoteDto({
       ...(await this.notesService.update(+id, updateNoteDto, user)),
-      userId: user.id,
+      // userId: user.id,
     });
   }
 

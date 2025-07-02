@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Theme } from './entities/theme.entity';
 import { TreeRepository } from 'typeorm';
@@ -11,6 +15,7 @@ export class ThemesService {
     @InjectRepository(Theme) private themeRepository: TreeRepository<Theme>,
   ) {}
   async create(createThemeDto: CreateThemeDto) {
+    await this.checkName(createThemeDto.name);
     const theme = new Theme();
     theme.name = createThemeDto.name;
     if (createThemeDto.parentId) {
@@ -38,6 +43,7 @@ export class ThemesService {
     return this.themeRepository.find();
   }
   async update(id: number, updateThemeDto: UpdateThemeDto): Promise<Theme> {
+    if (updateThemeDto.name) await this.checkName(updateThemeDto.name);
     let theme = await this.findOne(id);
     const { parentId, ...updateThemeFields } = updateThemeDto;
     if (parentId) {
@@ -50,5 +56,10 @@ export class ThemesService {
       ...updateThemeFields,
     } as Theme;
     return await this.themeRepository.save(theme);
+  }
+  async checkName(name: string) {
+    if (await this.themeRepository.findOne({ where: { name } })) {
+      throw new ConflictException(`Theme with name ${name} already exists`);
+    }
   }
 }

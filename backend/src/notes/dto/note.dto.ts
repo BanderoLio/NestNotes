@@ -7,7 +7,7 @@ export class NoteDto {
   title: string;
   theme: Theme;
   content: string;
-  userId: number;
+  userId: number | null;
   @Exclude()
   user: User;
   constructor(partial: Partial<NoteDto>) {

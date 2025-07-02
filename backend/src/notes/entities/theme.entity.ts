@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   Tree,
@@ -9,6 +10,7 @@ import {
 } from 'typeorm';
 import { Note } from './note.entity';
 import { Exclude } from 'class-transformer';
+import { User } from '../../users/entities/user.entity';
 
 @Entity()
 @Tree('closure-table')
@@ -17,10 +19,12 @@ export class Theme {
   id: number;
   @Column({ unique: true })
   name: string;
-  @OneToMany(() => Note, (note) => note.theme)
+  @ManyToOne(() => User)
+  user: User;
+  @OneToMany(() => Note, (note) => note.theme, { onDelete: 'SET NULL' })
   notes: Note[];
   // @Exclude()
-  @TreeParent()
+  @TreeParent({ onDelete: 'SET NULL' })
   parent: Theme | null;
   // @Exclude()
   @TreeChildren()

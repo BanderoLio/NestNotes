@@ -2,12 +2,15 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   Param,
+  ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseInterceptors,
 } from '@nestjs/common';
 import { ThemesService } from './themes.service';
@@ -23,8 +26,13 @@ export class ThemesController {
     return this.themesService.findAll();
   }
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.themesService.findOne(id);
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('desc', new DefaultValuePipe(false), ParseBoolPipe) desc: boolean,
+  ) {
+    return desc
+      ? this.themesService.findDescendants(await this.themesService.findOne(id))
+      : this.themesService.findOne(id);
   }
   @Post()
   create(@Body() createThemeDto: CreateThemeDto) {
