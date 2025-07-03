@@ -5,8 +5,10 @@ import {
   Delete,
   Get,
   Param,
+  ParseArrayPipe,
   Patch,
   Post,
+  Query,
   UseInterceptors,
 } from '@nestjs/common';
 import { NotesService } from './notes.service';
@@ -27,12 +29,26 @@ export class NotesController {
   }
 
   @Get()
-  async findAll(@GetUser() user: User) {
-    return (await this.notesService.findAll(user)).map(
+  async findAll(
+    @GetUser() user: User,
+    @Query('title') title?: string,
+    @Query('content') content?: string,
+    @Query(
+      'themeIds',
+      new ParseArrayPipe({ items: Number, separator: ',', optional: true }),
+    )
+    themeIds?: number[],
+  ) {
+    return (
+      await this.notesService.findAll(user, {
+        title,
+        content,
+        themeIds,
+      })
+    ).map(
       (note) =>
         new NoteDto({
           ...note,
-          // userId: user.id,
         }),
     );
   }
@@ -41,7 +57,6 @@ export class NotesController {
   async findOne(@Param('id') id: string, @GetUser() user: User) {
     return new NoteDto({
       ...(await this.notesService.findOne(+id, user)),
-      // userId: user.id,
     });
   }
 
@@ -53,7 +68,6 @@ export class NotesController {
   ) {
     return new NoteDto({
       ...(await this.notesService.update(+id, updateNoteDto, user)),
-      // userId: user.id,
     });
   }
 

@@ -3,9 +3,16 @@ import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Note } from './entities/note.entity';
-import { Repository } from 'typeorm';
+import {
+  FindOneOptions,
+  FindOptionsWhere,
+  ILike,
+  In,
+  Repository,
+} from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { ThemesService } from './themes.service';
+import { NoteQuery } from './interfaces/note.query.interface';
 
 @Injectable()
 export class NotesService {
@@ -18,19 +25,31 @@ export class NotesService {
     const note = new Note();
     Object.assign(note, createNoteFields);
     note.user = user;
-    if (themeId) note.theme = await this.themesService.findOne(themeId);
+    if (themeId) note.theme = await this.themesService.findOne(themeId, user);
     return this.noteRepository.save(note);
   }
 
-  findAll(user: User) {
+  findAll(user: User, filters: NoteQuery) {
+    const where: FindOptionsWhere<Note> = { userId: user.id };
+    if (filters.content) {
+      where.content = ILike(`%${filters.content}%`);
+    }
+    if (filters.title) {
+      where.title = ILike(`%${filters.title}%`);
+    }
+    if (filters.themeIds) {
+      where.theme = { id: In(filters.themeIds) };
+    }
     return this.noteRepository.find({
       relations: { theme: true },
-      where: { user },
+      where,
     });
   }
 
   async findOne(id: number, user: User) {
-    const note = await this.noteRepository.findOne({ where: { id, user } });
+    const note = await this.noteRepository.findOne({
+      where: { id, userId: user.id },
+    });
     if (!note) {
       throw new NotFoundException(`Note with id ${id} not found`);
     }
@@ -45,7 +64,7 @@ export class NotesService {
     const note = await this.findOne(id, user);
     const { themeId, ...updateNoteFields } = updateNoteDto;
     Object.assign(note, updateNoteFields);
-    if (themeId) note.theme = await this.themesService.findOne(themeId);
+    if (themeId) note.theme = await this.themesService.findOne(themeId, user);
     return this.noteRepository.save(note);
   }
 

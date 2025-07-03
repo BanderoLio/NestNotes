@@ -19,6 +19,9 @@ export class Theme {
   id: number;
   @Column({ unique: true })
   name: string;
+  @Exclude()
+  @Column({ nullable: true })
+  userId: number;
   @ManyToOne(() => User)
   user: User;
   @OneToMany(() => Note, (note) => note.theme, { onDelete: 'SET NULL' })

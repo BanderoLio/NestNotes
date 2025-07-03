@@ -37,7 +37,7 @@ export class UsersService {
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.getUser(id);
-    if (updateUserDto.username)
+    if (updateUserDto.username && updateUserDto.username !== user.username)
       await this.checkUsername(updateUserDto.username);
     if (updateUserDto.password)
       updateUserDto = {

@@ -16,37 +16,43 @@ import {
 import { ThemesService } from './themes.service';
 import { CreateThemeDto } from './dto/create-theme.dto';
 import { UpdateThemeDto } from './dto/update-theme.dto';
+import { GetUser } from '../auth/auth.decorator';
+import { User } from '../users/entities/user.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('themes')
 export class ThemesController {
   constructor(private themesService: ThemesService) {}
   @Get()
-  findAll() {
-    return this.themesService.findAll();
+  findAll(@GetUser() user: User) {
+    return this.themesService.findAll(user);
   }
   @Get(':id')
   async findOne(
     @Param('id', ParseIntPipe) id: number,
     @Query('desc', new DefaultValuePipe(false), ParseBoolPipe) desc: boolean,
+    @GetUser() user: User,
   ) {
     return desc
-      ? this.themesService.findDescendants(await this.themesService.findOne(id))
-      : this.themesService.findOne(id);
+      ? this.themesService.findDescendants(
+          await this.themesService.findOne(id, user),
+        )
+      : this.themesService.findOne(id, user);
   }
   @Post()
-  create(@Body() createThemeDto: CreateThemeDto) {
-    return this.themesService.create(createThemeDto);
+  create(@Body() createThemeDto: CreateThemeDto, @GetUser() user: User) {
+    return this.themesService.create(createThemeDto, user);
   }
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateThemeDto: UpdateThemeDto,
+    @GetUser() user: User,
   ) {
-    return this.themesService.update(id, updateThemeDto);
+    return this.themesService.update(id, updateThemeDto, user);
   }
   @Delete(':id')
-  delete(@Param('id', ParseIntPipe) id: number) {
-    return this.themesService.delete(id);
+  delete(@Param('id', ParseIntPipe) id: number, @GetUser() user: User) {
+    return this.themesService.delete(id, user);
   }
 }
