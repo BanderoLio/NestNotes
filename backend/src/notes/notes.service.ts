@@ -3,13 +3,7 @@ import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Note } from './entities/note.entity';
-import {
-  FindOneOptions,
-  FindOptionsWhere,
-  ILike,
-  In,
-  Repository,
-} from 'typeorm';
+import { FindOptionsWhere, ILike, In, Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { ThemesService } from './themes.service';
 import { NoteQuery } from './interfaces/note.query.interface';

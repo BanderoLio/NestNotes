@@ -30,10 +30,11 @@ export class ThemesController {
   @Get(':id')
   async findOne(
     @Param('id', ParseIntPipe) id: number,
-    @Query('desc', new DefaultValuePipe(false), ParseBoolPipe) desc: boolean,
+    @Query('findDescendants', new DefaultValuePipe(false), ParseBoolPipe)
+    findDescendants: boolean,
     @GetUser() user: User,
   ) {
-    return desc
+    return findDescendants
       ? this.themesService.findDescendants(
           await this.themesService.findOne(id, user),
         )
