@@ -9,6 +9,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { hash } from 'bcrypt';
+import { CodeError } from '../common/errors/code.error';
+import { UsersErrorCodes } from './enums/errorcodes.enum';
 
 @Injectable()
 export class UsersService {
@@ -56,18 +58,27 @@ export class UsersService {
     await this.userRepository.delete(id);
     return user;
   }
-
   private async getUser(id: number) {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
-      throw new NotFoundException(`User with id ${id} not found`);
+      throw new NotFoundException(
+        new CodeError(
+          UsersErrorCodes.USER_NOT_FOUND,
+          `User with id ${id} not found`,
+        ),
+      );
     }
     return user;
   }
   private async checkUsername(username: string) {
     const user = await this.userRepository.findOne({ where: { username } });
     if (user) {
-      throw new ConflictException(`User with name ${username} already exists`);
+      throw new ConflictException(
+        new CodeError(
+          UsersErrorCodes.USER_EXISTS,
+          `User with name ${username} already exists`,
+        ),
+      );
     }
   }
   private async hashPassword(password: string) {

@@ -1,4 +1,4 @@
-export interface NoteQuery {
+export interface NoteFiltersQuery {
   themeIds?: number[];
   title?: string;
   content?: string;

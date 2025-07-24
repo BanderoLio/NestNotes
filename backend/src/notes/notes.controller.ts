@@ -2,10 +2,12 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   Param,
   ParseArrayPipe,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -17,6 +19,10 @@ import { UpdateNoteDto } from './dto/update-note.dto';
 import { User } from '../users/entities/user.entity';
 import { GetUser } from '../auth/auth.decorator';
 import { NoteDto } from './dto/note.dto';
+import { PaginatedResponse } from '../common/interfaces/paginated-response.interface';
+import { ParseSortingPipe } from '../common/pipes/parse-sorting.pipe';
+import { NoteSortingDto } from './dto/note-sorting.dto';
+import { FindOptionsOrder } from 'typeorm';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('notes')
@@ -31,6 +37,10 @@ export class NotesController {
   @Get()
   async findAll(
     @GetUser() user: User,
+    @Query('limit', ParseIntPipe) limit: number,
+    @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip: number,
+    @Query('sorting', ParseSortingPipe)
+    sorting?: NoteSortingDto,
     @Query('title') title?: string,
     @Query('content') content?: string,
     @Query(
@@ -38,19 +48,25 @@ export class NotesController {
       new ParseArrayPipe({ items: Number, separator: ',', optional: true }),
     )
     themeIds?: number[],
-  ) {
-    return (
-      await this.notesService.findAll(user, {
+  ): Promise<PaginatedResponse<NoteDto>> {
+    const [notes, total] = await this.notesService.findAndCount(
+      user,
+      { limit, skip },
+      {
         title,
         content,
         themeIds,
-      })
-    ).map(
-      (note) =>
-        new NoteDto({
-          ...note,
-        }),
+      },
+      sorting,
     );
+    return {
+      data: notes.map((note) => new NoteDto(note)),
+      meta: {
+        limit,
+        skip,
+        total,
+      },
+    };
   }
 
   @Get(':id')

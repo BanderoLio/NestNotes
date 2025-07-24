@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Theme } from './entities/theme.entity';
-import { TreeRepository } from 'typeorm';
+import { DataSource, IsNull, TreeRepository } from 'typeorm';
 import { CreateThemeDto } from './dto/create-theme.dto';
 import { UpdateThemeDto } from './dto/update-theme.dto';
 import { User } from '../users/entities/user.entity';
@@ -14,6 +14,7 @@ import { User } from '../users/entities/user.entity';
 export class ThemesService {
   constructor(
     @InjectRepository(Theme) private themeRepository: TreeRepository<Theme>,
+    private dataSource: DataSource,
   ) {}
   async create(createThemeDto: CreateThemeDto, user: User) {
     await this.checkName(createThemeDto.name);
@@ -41,8 +42,17 @@ export class ThemesService {
   findDescendants(theme: Theme) {
     return this.themeRepository.findDescendants(theme);
   }
-  findAll(user: User) {
-    return this.themeRepository.find({ where: { user } });
+  async findAll(user: User, tree: boolean = false) {
+    if (!tree) return this.themeRepository.find({ where: { user } });
+    const roots = await this.themeRepository.find({
+      where: {
+        user,
+        parent: IsNull(),
+      },
+    });
+    return Promise.all(
+      roots.map((root) => this.themeRepository.findDescendantsTree(root)),
+    );
   }
   async update(
     id: number,

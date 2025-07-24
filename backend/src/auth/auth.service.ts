@@ -5,6 +5,8 @@ import { LoginDto } from './dto/login.dto';
 import { compare } from 'bcrypt';
 import { Jwt, JwtPayload } from './interfaces/jwt.interface';
 import { RegisterDto } from './dto/register.dto';
+import { CodeError } from '../common/errors/code.error';
+import { AuthErrorCodes } from './enums/errorcodes.enum';
 
 @Injectable()
 export class AuthService {
@@ -16,11 +18,16 @@ export class AuthService {
     const user = await this.usersService.findByName(loginDto.username);
     if (!user) {
       throw new UnauthorizedException(
-        `User with name ${loginDto.username} not found`,
+        new CodeError(
+          AuthErrorCodes.USER_NOT_FOUND,
+          `User with name ${loginDto.username} not found`,
+        ),
       );
     }
     if (!(await compare(loginDto.password, user.password))) {
-      throw new UnauthorizedException(`Wrong password provided`);
+      throw new UnauthorizedException(
+        new CodeError(AuthErrorCodes.WRONG_PASSWORD, `Wrong password provided`),
+      );
     }
     const payload: Partial<JwtPayload> = { sub: user.id };
     return {
@@ -49,7 +56,9 @@ export class AuthService {
         await this.jwtService.verifyAsync<JwtPayload>(access_token);
       return await this.usersService.findOne(payload.sub);
     } catch {
-      throw new UnauthorizedException(`Wrong token provided`);
+      throw new UnauthorizedException(
+        new CodeError(AuthErrorCodes.WRONG_TOKEN, 'Wrong token provided'),
+      );
     }
   }
 }

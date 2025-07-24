@@ -3,10 +3,17 @@ import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Note } from './entities/note.entity';
-import { FindOptionsWhere, ILike, In, Repository } from 'typeorm';
+import {
+  FindOptionsOrder,
+  FindOptionsWhere,
+  ILike,
+  In,
+  Repository,
+} from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { ThemesService } from './themes.service';
-import { NoteQuery } from './interfaces/note.query.interface';
+import { NoteFiltersQuery } from './interfaces/note.query.interface';
+import { PageParam } from '../common/interfaces/page-param.interface';
 
 @Injectable()
 export class NotesService {
@@ -23,7 +30,12 @@ export class NotesService {
     return this.noteRepository.save(note);
   }
 
-  findAll(user: User, filters: NoteQuery) {
+  findAndCount(
+    user: User,
+    { limit, skip }: PageParam,
+    filters: NoteFiltersQuery,
+    order?: FindOptionsOrder<Note>,
+  ) {
     const where: FindOptionsWhere<Note> = { userId: user.id };
     if (filters.content) {
       where.content = ILike(`%${filters.content}%`);
@@ -34,9 +46,13 @@ export class NotesService {
     if (filters.themeIds) {
       where.theme = { id: In(filters.themeIds) };
     }
-    return this.noteRepository.find({
+
+    return this.noteRepository.findAndCount({
       relations: { theme: true },
       where,
+      take: limit,
+      skip,
+      order: order ?? { createdAt: 'DESC' },
     });
   }
 

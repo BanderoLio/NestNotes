@@ -53,7 +53,7 @@ export function RegisterForm() {
           </Field.Root>
         </Fieldset.Content>
         <Button type={'submit'} loading={isLoading}>
-          Войти
+          Зарегистрироваться
         </Button>
       </Fieldset.Root>
     </form>

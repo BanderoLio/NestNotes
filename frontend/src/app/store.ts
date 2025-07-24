@@ -1,8 +1,6 @@
 import type { Action, ThunkAction } from '@reduxjs/toolkit';
 import { combineSlices, configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
-import { counterSlice } from '../features/counter/counterSlice';
-import { quotesApiSlice } from '../features/quotes/quotesApiSlice';
 import { authSlice } from '@/features/auth/authSlice.ts';
 import { authApiSlice } from '@/features/auth/authApiSlice.ts';
 import persistReducer from 'redux-persist/lib/persistReducer';
@@ -10,14 +8,18 @@ import type { PersistConfig } from 'redux-persist';
 import { persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import { PERSIST, REHYDRATE } from 'redux-persist/lib/constants';
+import { notesApiSlice } from '@/features/notes/notesApiSlice.ts';
+import { themesApiSlice } from '@/features/themes/themesApiSlice.ts';
+import { notesSlice } from '@/features/notes/notesSlice.ts';
 
 // `combineSlices` automatically combines the reducers using
 // their `reducerPath`s, therefore we no longer need to call `combineReducers`.
 const rootReducer = combineSlices(
-  counterSlice,
-  quotesApiSlice,
   authApiSlice,
   authSlice,
+  notesSlice,
+  notesApiSlice,
+  themesApiSlice,
 );
 
 // Infer the `RootState` type from the root reducer
@@ -30,12 +32,11 @@ const persistConfig: PersistConfig<RootState> = {
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
+export type PersistState = ReturnType<typeof persistedReducer>;
 
 // The store setup is wrapped in `makeStore` to allow reuse
 // when setting up tests that need the same store config
-export const makeStore = (
-  preloadedState?: ReturnType<typeof persistedReducer>,
-) => {
+export const makeStore = (preloadedState?: PersistState) => {
   const store = configureStore({
     reducer: persistedReducer,
     // Adding the api middleware enables caching, invalidation, polling,
@@ -45,7 +46,11 @@ export const makeStore = (
         serializableCheck: {
           ignoredActions: [REHYDRATE, PERSIST],
         },
-      }).concat(quotesApiSlice.middleware, authApiSlice.middleware);
+      }).concat(
+        authApiSlice.middleware,
+        notesApiSlice.middleware,
+        themesApiSlice.middleware,
+      );
     },
     preloadedState,
   });

@@ -1,4 +1,11 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Theme } from './theme.entity';
 
@@ -6,10 +13,10 @@ import { Theme } from './theme.entity';
 export class Note {
   @PrimaryGeneratedColumn()
   id: number;
-  @Column({ nullable: true })
-  userId: number | null;
   @ManyToOne(() => User)
   user: User;
+  @Column({ nullable: true })
+  userId: number | null;
   @Column({
     nullable: true,
   })
@@ -20,4 +27,8 @@ export class Note {
     type: 'text',
   })
   content: string;
+  @CreateDateColumn()
+  createdAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

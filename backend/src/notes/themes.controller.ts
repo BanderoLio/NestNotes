@@ -18,14 +18,20 @@ import { CreateThemeDto } from './dto/create-theme.dto';
 import { UpdateThemeDto } from './dto/update-theme.dto';
 import { GetUser } from '../auth/auth.decorator';
 import { User } from '../users/entities/user.entity';
+import { ThemesResponse } from './interfaces/themes-response.interface';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('themes')
 export class ThemesController {
   constructor(private themesService: ThemesService) {}
   @Get()
-  findAll(@GetUser() user: User) {
-    return this.themesService.findAll(user);
+  async findAll(
+    @Query('tree', new DefaultValuePipe(false), ParseBoolPipe) tree: boolean,
+    @GetUser() user: User,
+  ): Promise<ThemesResponse> {
+    return {
+      data: await this.themesService.findAll(user, tree),
+    };
   }
   @Get(':id')
   async findOne(

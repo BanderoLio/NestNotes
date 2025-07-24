@@ -1,35 +1,32 @@
 import './App.css';
-import { LoginForm } from '@/features/auth/components/LoginForm.tsx';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { Text } from '@chakra-ui/react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthGuard } from '@/features/auth/components/AuthGuard.tsx';
+import { LoginPage } from '@/pages/LoginPage.tsx';
+import { RegisterPage } from '@/pages/RegisterPage.tsx';
+import { NotesPage } from '@/pages/NotesPage.tsx';
+import { Container } from '@chakra-ui/react';
 
 export const App = () => {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path={'/auth'}>
-          <Route path={'login'} element={<LoginForm />} />
+      <Container p={0} colorPalette={'blue'}>
+        <Routes>
+          <Route path={'/auth'}>
+            <Route path={'login'} element={<LoginPage />} />
+            <Route path={'register'} element={<RegisterPage />} />
+          </Route>
+          <Route path={'/notes'} element={<NotesPage />} />
           <Route
-            path={'register'}
+            path={'/'}
             element={
               <>
                 <AuthGuard />
-                <Text>Test page</Text>
+                <Navigate to={'/notes/'} />
               </>
             }
           />
-        </Route>
-        <Route
-          path={'/'}
-          element={
-            <>
-              <AuthGuard />
-              <Text>Мэйн страница</Text>
-            </>
-          }
-        />
-      </Routes>
+        </Routes>
+      </Container>
     </BrowserRouter>
   );
 };

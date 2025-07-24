@@ -7,6 +7,8 @@ import databaseConfig from './config/database.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { NotesModule } from './notes/notes.module';
+import { ParseSortingPipe } from './common/pipes/parse-sorting.pipe';
+import { APP_PIPE } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -17,6 +19,12 @@ import { NotesModule } from './notes/notes.module';
     NotesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: ParseSortingPipe,
+      useClass: ParseSortingPipe,
+    },
+  ],
 })
 export class AppModule {}

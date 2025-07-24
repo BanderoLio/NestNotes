@@ -73,6 +73,7 @@ const eslintConfig = config(
           },
         },
       ],
+      '@typescript-eslint/no-invalid-void-type': ['off'],
       'no-restricted-imports': [
         2,
         {
