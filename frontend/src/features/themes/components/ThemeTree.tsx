@@ -15,9 +15,9 @@ import type { TreeTheme } from '@/features/themes/interfaces/tree-theme.interfac
 import { MdCircle, MdTopic } from 'react-icons/md';
 import { Tooltip } from '@/components/ui/tooltip.tsx';
 import { useAppDispatch } from '@/app/hooks.ts';
-import { updateFilters } from '@/features/notes/notesSlice.ts';
+import { setThemeIdsByTreeTheme } from '@/features/notes/notesSlice.ts';
 
-function ThemeFilterButton() {
+function ThemeFilterButton({ theme }: { theme: TreeTheme }) {
   const dispatch = useAppDispatch();
   return (
     <Tooltip content={'Искать по теме'}>
@@ -25,11 +25,7 @@ function ThemeFilterButton() {
         variant={'plain'}
         onClick={e => {
           e.stopPropagation();
-          dispatch(
-            updateFilters({
-              themeIds: [22, 23],
-            }),
-          );
+          dispatch(setThemeIdsByTreeTheme(theme));
         }}
       >
         <MdCircle />
@@ -99,7 +95,7 @@ export function ThemeTree() {
                       {node.name}
                     </Highlight>
                   </TreeView.BranchText>
-                  <ThemeFilterButton />
+                  <ThemeFilterButton theme={node} />
                 </TreeView.BranchControl>
               ) : (
                 <TreeView.Item>
@@ -112,7 +108,7 @@ export function ThemeTree() {
                       {node.name}
                     </Highlight>
                   </TreeView.ItemText>
-                  <ThemeFilterButton />
+                  <ThemeFilterButton theme={node} />
                 </TreeView.Item>
               )
             }

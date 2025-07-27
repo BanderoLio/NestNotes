@@ -7,6 +7,8 @@ import { useIntersectionObserver } from '@/app/hooks/use-intersection-observer';
 import type { Note } from '@/features/notes/interfaces/note.interface.ts';
 import { useAppSelector } from '@/app/hooks.ts';
 import { selectFilters } from '@/features/notes/notesSlice.ts';
+import { EmptyState } from '@/components/ui/empty-state.tsx';
+import { RiEmotionUnhappyFill } from 'react-icons/ri';
 
 export type NotesListProps = {
   onEdit: (note: Note) => void;
@@ -37,12 +39,21 @@ export function NotesList({ onEdit }: NotesListProps) {
         overflowY={'auto'}
         flex={'1'}
         gap={4}
-        direction={'column'}
+        direction={'column-reverse'}
         justify={'flex-start'}
       >
-        {notes.map(note => (
-          <NoteView key={note.id} note={note} onEdit={onEdit} />
-        ))}
+        {notes.length ? (
+          notes.map(note => (
+            <NoteView key={note.id} note={note} onEdit={onEdit} />
+          ))
+        ) : (
+          <Center>
+            <EmptyState
+              title={'Ничего не найдено'}
+              icon={<RiEmotionUnhappyFill />}
+            />
+          </Center>
+        )}
         {hasNextPage && (
           <Center ref={observerRef} p={4}>
             <ProgressCircle value={null} />

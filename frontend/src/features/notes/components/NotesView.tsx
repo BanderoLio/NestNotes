@@ -11,7 +11,7 @@ export function NotesView() {
     console.log(editingNote);
   }, [editingNote]);
   return (
-    <Stack gap={4} h={'full'} overflow={'auto'}>
+    <Stack gap={2} h={'full'} overflow={'auto'}>
       <NotesList onEdit={setEditingNote} />
       <InputBar
         note={editingNote}

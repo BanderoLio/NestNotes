@@ -1,7 +1,7 @@
 import { Container, SimpleGrid } from '@chakra-ui/react';
 import { AuthGuard } from '@/features/auth/components/AuthGuard.tsx';
 import { NotesView } from '@/features/notes/components/NotesView.tsx';
-import { ThemeTree } from '@/features/themes/components/ThemeTree.tsx';
+import { NotesFilters } from '@/features/notes/components/NotesFilters.tsx';
 
 export function NotesPage() {
   return (
@@ -14,7 +14,7 @@ export function NotesPage() {
           gap={4}
           overflow={'auto'}
         >
-          <ThemeTree />
+          <NotesFilters />
           <NotesView />
         </SimpleGrid>
       </Container>
